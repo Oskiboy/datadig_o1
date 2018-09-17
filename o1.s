@@ -10,12 +10,15 @@
 
 Start:
     bl      poll_button
+    ldr     lr, [pci{, #8}]
     bne     turn_on_led
-    bl     turn_off_led
+    beq     turn_off_led
     b Start
 
 
 poll_button:
+    push {lr}
+
     ldr r0, =BUTTON_PORT
     ldr r1, =PORT_SIZE
     mul r0, r0, r1
@@ -30,9 +33,11 @@ poll_button:
     and r0, r3, r2          //compare the input with the bit we want
     cmp r0, #0
 
-    mov pc, lr              //go back to call location
+    pop {pc}             //go back to call location
 
 turn_off_led:
+    push {lr}
+
     ldr r0, =PORT_E
     ldr r1, =PORT_SIZE
     mul r0, r0, r1
@@ -43,10 +48,12 @@ turn_off_led:
     lsl r2, r2, #LED_PIN
     ldr r1, =GPIO_PORT_DOUTCLR
     str r2, [r0, r1]
-
-    mov pc, lr
+    
+    pop {pc}
 
 turn_on_led:
+    push {lr}
+
     ldr r0, =PORT_E
     ldr r1, =PORT_SIZE
     mul r0, r0, r1
@@ -58,7 +65,7 @@ turn_on_led:
     ldr r1, =GPIO_PORT_DOUTSET
     str r2, [r0, r1]
     
-    b Start
+    pop {pc}
 
 NOP // no touchey
 
